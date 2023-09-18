@@ -12,7 +12,7 @@ kaboom({
   const gaintJumpForce   = 460
   let currentJumpForce   = jumpForce 
   const fallDeath  = 400
-  const enemySpeed  = 20
+  let enemySpeed  = 20
   
   let isJumping = true
   
@@ -42,16 +42,16 @@ kaboom({
   
     const maps = [
       [
-        '                                      ',
-        '                                      ',
-        '                                      ',
-        '                                      ',
-        '                                      ',
-        '     %   =*=%=                        ',
-        '                                      ',
-        '                            -+        ',
-        '                    ^   ^   ()        ',
-        '==============================   =====',
+        '1                                      1',
+        '1                                      1',
+        '1                                      1',
+        '1                                      1',
+        '1                                      1',
+        '1     %   =*=%=                        1',
+        '1                                      1',
+        '1                            -+        1',
+        '1                    ^   ^   ()        1',
+        '1==============================   =====1',
       ],
       [
         '£                                                       £',
@@ -66,16 +66,16 @@ kaboom({
         '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   !   !   !   !    !!!!!!!',
       ],
       [
-        '                                                         ',
-        '                                                         ',
-        '                                                         ',
-        '                                                         ',
-        '                                                         ',
-        '     %   =*=%=                                           ',
-        '                                   =                     ',
-        '                                  ==                   -+',
-        '                       ^  ^   ^  ===                   ()',
-        '======== === =======================     ================',
+        '1                                                         1',
+        '1                                                         1',
+        '1                                                         1',
+        '1                                                         1',
+        '1                                                         1',
+        '1     %   =*=%=                                           1',
+        '1                                   =                     1',
+        '1                                  ==                   -+1',
+        '1                       ^  ^   ^  ===                   ()1',
+        '1========  ===  =======================     ==============1',
       ]
     ]
   
@@ -83,6 +83,7 @@ kaboom({
       width: 20,
       height: 20,
       '=': [sprite('block'), solid()],
+      '1': [sprite('brick'), solid(),"walls"],
       '$': [sprite('coin'), 'coin'],
       '%': [sprite('surprise'), solid(), 'coin-surprise'],
       '*': [sprite('surprise'), solid(), 'mushroom-surprise'],
@@ -94,11 +95,11 @@ kaboom({
       '^': [sprite('mob-shroom'), solid(), 'mob'],
       '#': [sprite('mushroom'), solid(), 'mushroom', body()],
       '!': [sprite('blue-block'), solid(), scale(0.5)],
-      '£': [sprite('blue-brick'), solid(), scale(0.5)],
+      '£': [sprite('blue-brick'), solid(), scale(0.5), "walls"],
       'z': [sprite('blue-mob-shroom'), solid(), scale(0.5), 'mob'],
       '@': [sprite('blue-surprise'), solid(), scale(0.5), 'coin-surprise'],
       'v': [sprite('blue-surprise'), solid(), scale(0.5), 'mushroom-surprise'],
-      'x': [sprite('blue-steel'), solid(), scale(0.5)],
+      'x': [sprite('blue-steel'), solid(), scale(0.5), "walls"],
   
     }
   
@@ -156,7 +157,11 @@ kaboom({
     action('mushroom', (m) => {
       m.move(20, 0)
     })
-  
+    
+    action('coin', (m) => {
+      m.move(20, 0)
+    })
+
     player.on("headbump", (obj) => {
       if (obj.is('coin-surprise')) {
         gameLevel.spawn('$', obj.gridPos.sub(0, 1))
@@ -180,7 +185,16 @@ kaboom({
       scoreLabel.value++
       scoreLabel.text = scoreLabel.value
     })
-  
+    
+    collides('mob', 'walls', () => {
+      enemySpeed *= -1
+    })
+
+    collides('mob', 'pipe', () => {
+      enemySpeed *= -1
+    })
+
+
     action('mob', (d) => {
       d.move(-enemySpeed , 0)
     })
