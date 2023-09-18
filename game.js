@@ -54,16 +54,28 @@ kaboom({
         '==============================   =====',
       ],
       [
-        '£                                       £',
-        '£                                       £',
-        '£                                       £',
-        '£                                       £',
-        '£                                       £',
-        '£        @@@@@@              x x        £',
-        '£                          x x x        £',
-        '£                        x x x x  x   -+£',
-        '£               z   z  x x x x x  x   ()£',
-        '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!',
+        '£                                                       £',
+        '£                                                       £',
+        '£                                                       £',
+        '£                                                       £',
+        '£                                                       £',
+        '£        @@v@@@                          x   x          £',
+        '£                                    x   x   x          £',
+        '£                                x   x   x   x    x   -+£',
+        '£                     z   z  x   x   x   x   x    x   ()£',
+        '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   !   !   !   !    !!!!!!!',
+      ],
+      [
+        '                                                         ',
+        '                                                         ',
+        '                                                         ',
+        '                                                         ',
+        '                                                         ',
+        '     %   =*=%=                                           ',
+        '                                   =                     ',
+        '                                  ==                   -+',
+        '                       ^  ^   ^  ===                   ()',
+        '======== === =======================     ================',
       ]
     ]
   
@@ -85,6 +97,7 @@ kaboom({
       '£': [sprite('blue-brick'), solid(), scale(0.5)],
       'z': [sprite('blue-mob-shroom'), solid(), scale(0.5), 'mob'],
       '@': [sprite('blue-surprise'), solid(), scale(0.5), 'coin-surprise'],
+      'v': [sprite('blue-surprise'), solid(), scale(0.5), 'mushroom-surprise'],
       'x': [sprite('blue-steel'), solid(), scale(0.5)],
   
     }
@@ -175,7 +188,10 @@ kaboom({
     player.collides('mob', (d) => {
       if (isJumping) {
         destroy(d)
-      } else {
+      } else if(player.isBig()){
+        destroy(d)
+        player.smallify()
+      }else{
         go('lose', { score: scoreLabel.value})
       }
     })
