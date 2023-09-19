@@ -84,7 +84,7 @@ kaboom({
       height: 20,
       '=': [sprite('block'), solid()],
       '1': [sprite('brick'), solid(),"walls"],
-      '$': [sprite('coin'), 'coin'],
+      '$': [sprite('coin'),body(), 'coin'],
       '%': [sprite('surprise'), solid(), 'coin-surprise'],
       '*': [sprite('surprise'), solid(), 'mushroom-surprise'],
       '}': [sprite('unboxed'), solid()],
