@@ -3,8 +3,13 @@ kaboom({
     fullscreen: true,
     scale: 1,
     debug: true,
-    clearColor:[0,0,1,1],
+    clearColor:[0,0,0,1],
 })
+
+const moveSpeed  = 120
+const slicerSpeed = 100
+const skeletorSpeed = 60
+
 
 loadSprite("link-going-left", "/zelda/icon-images/14 - 1Xq9biB.png")
 loadSprite("link-going-right", "/zelda/icon-images/15 - yZIb8O2.png")
@@ -29,29 +34,32 @@ loadSprite("stairs", "/zelda/icon-images/19 - VghkL08.png")
 loadSprite("background", "/zelda/icon-images/5 - u4DVsx6.png")
 
 
-scene("game",({level, score})=>{
-
-    layers[("bg", "obj", "ui"), "obj"]
+scene('game', ({ level, score }) => {
+  layers(['bg', 'obj', 'ui'], 'obj')
     
-    const map = [
-        "c@@@@@@@@@@@@)@@@@@@@^@@@@@@@@z",
-        "!                             $",
-        "!    <                        $",
-        "!                  (          $",
-        "%     (                   <   $",
-        "!                             $",
-        "!                             $",
-        "!       <                     $",
-        "!                             $",
-        "!                   <         $",
-        "!     (                       $",
-        "!                             $",
-        "!                  (          $",
-        "!              <              $",
-        "!                             $",
-        "!    <                        $",
-        "!                             $",
-        "x########)#############)######v",
+    const maps = [
+        [
+        "c@@)@@^@@z",
+        "!        $",
+        "!    <   $",
+        "!     (  $",
+        "%        $",
+        "!  (     $",
+        "!  <     $",
+        "!      < $",
+        "!        $",
+        "x######)#v",
+    ],[
+      'c@@@@@@@@z',
+      '!        $',
+      ')     >  )',
+      '!  > *   $',
+      '!        )',
+      '!    >   $',
+      ')   *    )',
+      '!        $',
+      'x########v',
+    ]
     ]
 
     const levelCfg = {
@@ -65,21 +73,25 @@ scene("game",({level, score})=>{
         "x": [sprite('bottom-left-wall'), solid(), "wall"],
         "c": [sprite('top-left-wall'), solid(), "wall"],
         "v": [sprite('bottom-right-wall'), solid(), "wall"],
-        "%": [sprite("left-door"), solid()],
-        "^": [sprite("top-door")],
-        "*": [sprite("stairs")],
-        "<": [sprite("slicer")],
-        ">": [sprite("skeletor")],
+        "%": [sprite("left-door"), "door", solid()],
+        "^": [sprite("top-door"),"next-level"],
+        "*": [sprite("stairs"), "next-level"],
+        "<": [sprite("slicer"), "slicer", "dangerous", {dir: -1}],
+        ">": [sprite("skeletor"), "skeletor", "dangerous", {dir: -1, timer: 0}],
         ")": [sprite("laterns"), solid()],
         "(": [sprite("fire-pot"), solid()],
 
     }
 
-    addLevel(map, levelCfg)
-    // add([sprite("background"), layers("bg")])
+    const gameLevel =  addLevel(maps[level], levelCfg)
+
+    add([sprite('background'), layer('bg')])
+
+
+
     add([
         text("0"),
-        pos(50, 900),
+        pos(1600, 900),
         layer("ui"),
         {
             value: score,
@@ -87,9 +99,9 @@ scene("game",({level, score})=>{
         scale(2),
     ])
 
-    add([
+    const scoreLabel = add([
         text("level: " + parseInt(level + 1)),
-        pos(50, 930),
+        pos(1600, 930),
         layer("ui"),
         {
             value: level,
@@ -97,8 +109,106 @@ scene("game",({level, score})=>{
         scale(2),
     ])
 
+    const player = add([
+        sprite("link-going-right"),
+        pos(50,190),
+        {
+            //right by default
+            dir: vec2(1,0)
+        }
+    ])
+
+    player.action(()=>{
+        player.resolve()
+    })
+
+    player.overlaps("next-level", ()=>{
+        go("game",{
+            level: (level + 1) % maps.length,
+            score: scoreLabel.value
+        })
+    })
+
+    keyDown("a", ()=>{
+        player.changeSprite("link-going-left"),
+        player.move(-moveSpeed,0),
+        player.dir = vec2(-1,0)
+    })
+
+    keyDown("d", ()=>{
+        player.changeSprite("link-going-right"),
+        player.move(moveSpeed,0),
+        player.dir = vec2(1,0)
+    })
+
+    keyDown("w", ()=>{
+        player.changeSprite("link-going-up"),
+        player.move(0,-moveSpeed),
+        player.dir = vec2(0,-1)
+    })
+    keyDown("s", ()=>{
+        player.changeSprite("link-going-down"),
+        player.move(0,moveSpeed),
+        player.dir = vec2(0,1)
+    })
+
+    function attack(p){
+        const obj = add([sprite("kaboom"), pos(p), "kaboom"])
+        wait(1, () =>{
+            destroy(obj)
+        })
+    }
+
+    player.collides("door", (d)=>{
+        destroy(d)
+        gameLevel.spawn("!", d.gridPos.sub(0,0))
+    })
+
+    keyPress("space", ()=>{
+        attack(player.pos.add(player.dir.scale(48)))
+        
+    })
+
+    collides("kaboom", "skeletor", (k, s)=>{
+        camShake(4)
+        wait(1,()=>{
+            destroy(k)
+        })
+        destroy(s)
+        scoreLabel.value++
+        scoreLabel.text = scoreLabel.value
+    })
+
+    action("slicer", (s)=>{
+        s.move(s.dir * slicerSpeed,0)
+    })
+    
+    action("skeletor", (s)=>{
+        s.move(0,s.dir * skeletorSpeed)
+        s.timer -=dt()
+        if(s.timer <= 0){
+            s.dir *= -1
+            s.timer = rand(5)
+        }
+    })
+
+    collides("skeletor","wall", (s) =>{
+        s.dir *= -1
+    })
+
+    collides("slicer","wall", (s) =>{
+        s.dir *= -1
+    })
+
+    player.overlaps("dangerous",(d)=>{
+        go('lose', { score: scoreLabel.value})
+    })
 
 })
+
+scene('lose', ({ score }) => {
+    add([text(score, 32), origin('center'), pos(width()/2, height()/ 2)])
+  })
 
 
 start("game", {level: 0, score: 0})
