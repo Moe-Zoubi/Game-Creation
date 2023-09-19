@@ -26,34 +26,79 @@ loadSprite("slicer", "/zelda/icon-images/18 - c6JFi5Z.png")
 loadSprite("skeletor", "/zelda/icon-images/17 - Ei1VnX8.png")
 loadSprite("kaboom", "/zelda/icon-images/9 - o9WizfI.png")
 loadSprite("stairs", "/zelda/icon-images/19 - VghkL08.png")
-oadSprite("background", "/zelda/icon-images/5 - u4DVsx6.png")
+loadSprite("background", "/zelda/icon-images/5 - u4DVsx6.png")
 
 
-scene("game",()=>{
+scene("game",({level, score})=>{
+
+    layers[("bg", "obj", "ui"), "obj"]
     
     const map = [
-        "a        ",
-        "a        ",
-        "a        ",
-        "a        ",
-        "a        ",
-        "a        ",
-        "a        ",
-        "a        ",
-        "aaaaaaaaa",
+        "c@@@@@@@@@@@@)@@@@@@@^@@@@@@@@z",
+        "!                             $",
+        "!    <                        $",
+        "!                  (          $",
+        "%     (                   <   $",
+        "!                             $",
+        "!                             $",
+        "!       <                     $",
+        "!                             $",
+        "!                   <         $",
+        "!     (                       $",
+        "!                             $",
+        "!                  (          $",
+        "!              <              $",
+        "!                             $",
+        "!    <                        $",
+        "!                             $",
+        "x########)#############)######v",
     ]
 
     const levelCfg = {
         width: 48,
         height: 48,
-        "a": [sprite("left-wall"), solid()],
-        
+        "!": [sprite("left-wall"), solid(), "wall"],
+        "$": [sprite('right-wall'), solid(), "wall"],
+        "@": [sprite('top-wall'), solid(), "wall"],
+        "#": [sprite('bottom-wall'), solid(), "wall"],
+        "z": [sprite('top-right-wall'), solid(), "wall"],
+        "x": [sprite('bottom-left-wall'), solid(), "wall"],
+        "c": [sprite('top-left-wall'), solid(), "wall"],
+        "v": [sprite('bottom-right-wall'), solid(), "wall"],
+        "%": [sprite("left-door"), solid()],
+        "^": [sprite("top-door")],
+        "*": [sprite("stairs")],
+        "<": [sprite("slicer")],
+        ">": [sprite("skeletor")],
+        ")": [sprite("laterns"), solid()],
+        "(": [sprite("fire-pot"), solid()],
+
     }
 
     addLevel(map, levelCfg)
+    // add([sprite("background"), layers("bg")])
+    add([
+        text("0"),
+        pos(50, 900),
+        layer("ui"),
+        {
+            value: score,
+        },
+        scale(2),
+    ])
+
+    add([
+        text("level: " + parseInt(level + 1)),
+        pos(50, 930),
+        layer("ui"),
+        {
+            value: level,
+        },
+        scale(2),
+    ])
 
 
 })
 
 
-start("game")
+start("game", {level: 0, score: 0})
